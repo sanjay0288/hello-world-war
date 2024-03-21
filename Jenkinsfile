@@ -27,18 +27,18 @@ pipeline {
         stage('Deploy') {
             parallel {
                 stage('DeployQA') {
-                    agent { label 'slave1' }
+                    agent { label 'Slave1' }
                     steps {
                         script {
-                            deployToNode('slave1')
+                            deployToNode('Slave1')
                         }
                     }
                 }
                 stage('DeployProd') {
-                    agent { label 'slave2' }
+                    agent { label 'Slave2' }
                     steps {
                         script {
-                            deployToNode('slave2')
+                            deployToNode('Slave2')
                         }
                     }
                 }

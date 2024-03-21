@@ -16,7 +16,7 @@ pipeline {
         
         stage('Push') {
             steps {
-                withCredentials([usernamePassword(credentialsId: '9edb749c-52c9-40d2-9266-024789f72979', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                withCredentials([usernamePassword(credentialsId: '1207a9ab-d7c7-4b11-a923-b1a116622af2', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                     sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
                     sh "docker tag tomcat-war:${BUILD_NUMBER} sanjay0288/tomcat:${BUILD_NUMBER}"
                     sh "docker push sanjay0288/tomcat:${BUILD_NUMBER}"
@@ -27,18 +27,18 @@ pipeline {
         stage('Deploy') {
             parallel {
                 stage('DeployQA') {
-                    agent { label 'slave102' }
+                    agent { label 'slave1' }
                     steps {
                         script {
-                            deployToNode('slave102')
+                            deployToNode('slave1')
                         }
                     }
                 }
                 stage('DeployProd') {
-                    agent { label 'slave33' }
+                    agent { label 'slave2' }
                     steps {
                         script {
-                            deployToNode('slave33')
+                            deployToNode('slave2')
                         }
                     }
                 }
@@ -48,7 +48,7 @@ pipeline {
 }
 
 def deployToNode(nodeLabel) {
-    withCredentials([usernamePassword(credentialsId: '9edb749c-52c9-40d2-9266-024789f72979', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+    withCredentials([usernamePassword(credentialsId: '1207a9ab-d7c7-4b11-a923-b1a116622af2', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
         sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
         sh "docker pull sanjay0288/tomcat:${BUILD_NUMBER}"
         sh "docker rm -f tomcat-${nodeLabel} || true"

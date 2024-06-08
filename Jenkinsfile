@@ -5,7 +5,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 sh 'rm -rf Parcel-service'
-                sh 'https://github.com/sanjay0288/hello-world-war.git'
+                sh 'git clone https://github.com/sanjay0288/hello-world-war.git'
             }
         }
 

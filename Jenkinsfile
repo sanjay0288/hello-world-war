@@ -4,54 +4,43 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                sh 'rm -rf Parcel-service'
+                sh 'git clone -b feature-1 https://github.com/sanjay0288/Parcel-service.git'
             }
         }
-        
+
         stage('Build') {
             steps {
-                sh 'docker build -t tomcat-war:${BUILD_NUMBER} .'
+                script {
+          
+
+                    sh "mvn clean install"
+                }
             }
         }
-        
-        stage('Push') {
+
+        stage('Deploy to Tomcat') {
             steps {
-                withCredentials([usernamePassword(credentialsId: '1207a9ab-d7c7-4b11-a923-b1a116622af2', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                    sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
-                    sh "docker tag tomcat-war:${BUILD_NUMBER} sanjay0288/tomcat:${BUILD_NUMBER}"
-                    sh "docker push sanjay0288/tomcat:${BUILD_NUMBER}"
-                }
-            }
-        }
-        
-        stage('Deploy') {
-            parallel {
-                stage('DeployQA') {
-                    agent { label 'Slave1' }
-                    steps {
-                        script {
-                            deployToNode('Slave1')
-                        }
+                script {
+                    def warFileName = "target/hello-world.war"
+                    def tomcatDir = "/opt/apache-tomcat-10.1.24"
+
+                    sh "cp ${warFileName} ${tomcatDir}/webapps/"
+                    sh "${tomcatDir}/bin/shutdown.sh"
+                    sleep 5 
+                    sh "${tomcatDir}/bin/startup.sh"
                     }
-                }
-                stage('DeployProd') {
-                    agent { label 'Slave2' }
-                    steps {
-                        script {
-                            deployToNode('Slave2')
-                        }
-                    }
-                }
+                
             }
         }
     }
-}
 
-def deployToNode(nodeLabel) {
-    withCredentials([usernamePassword(credentialsId: '1207a9ab-d7c7-4b11-a923-b1a116622af2', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-        sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
-        sh "docker pull sanjay0288/tomcat:${BUILD_NUMBER}"
-        sh "docker rm -f tomcat-${nodeLabel} || true"
-        sh "docker run -d -p 5555:8080 --name tomcat-${nodeLabel} sanjay0288/tomcat:${BUILD_NUMBER}"
+    post {
+        success {
+            echo "Deployment to Tomcat successful!"
+        }
+        failure {
+            echo "Deployment to Tomcat failed!"
+        }
     }
 }

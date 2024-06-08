@@ -5,7 +5,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 sh 'rm -rf Parcel-service'
-                sh 'git clone -b feature-1 https://github.com/sanjay0288/Parcel-service.git'
+                sh 'https://github.com/sanjay0288/hello-world-war.git'
             }
         }
 
@@ -22,7 +22,7 @@ pipeline {
         stage('Deploy to Tomcat') {
             steps {
                 script {
-                    def warFileName = "target/hello-world.war"
+                    def warFileName = "target/hello-world-war.war"
                     def tomcatDir = "/opt/apache-tomcat-10.1.24"
 
                     sh "cp ${warFileName} ${tomcatDir}/webapps/"
